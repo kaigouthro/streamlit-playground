@@ -12,7 +12,25 @@ import utils
 
 PROMPT_DIR = "./data/prompts"
 DEFAULT_PROMPT_ID = "default_prompt"
+#
 # TODO(bfortuner): Update with token limits
+
+import openai
+
+def get_models (API_KEY) :
+	"""
+	for retrieving relevant models
+	and creates a string list or options
+	"""
+	resp = openai.Model.list ( API_KEY )
+	model_ids = [ ]
+	for model in resp [ 'data' ] :
+		if model [ 'id' ].startswith ( ('code' , 'text') ) and len ( model [ 'id' ].split ( '-' ) ) == 3 :
+			model_ids.append ( model [ 'id' ] )
+
+	model_ids.sort()
+	return model_ids
+
 MODELS = [
     "text-davinci-002",
     "text-curie-001",
@@ -34,7 +52,7 @@ STOP_SEQUENCES = [
 DEFAULT_PROMPT = utils.load_prompt(DEFAULT_PROMPT_ID, PROMPT_DIR)
 
 
-@st.cache(ttl=60 * 60 * 24)
+@st.cache_resource(ttl=60 * 60 * 24)
 def init_oai_client():
     ctx = Settings.from_env_file(".env.secret")
     cache = diskcache.Cache(directory=ctx.disk_cache_dir)
@@ -46,7 +64,7 @@ def init_oai_client():
     return oai_client
 
 
-@st.cache(ttl=5)
+@st.cache_data(ttl=5)
 def list_prompts(prompt_dir: str) -> List[str]:
     return utils.list_prompts(prompt_dir)
 
