@@ -70,7 +70,7 @@ class OAIClient:
         Returns:
             str. Cache key.
         """
-        return f"completion:" + ":".join(
+        return "completion:" + ":".join(
             [f"{k}={v}" for k, v in sorted(params.items())]
         )
 
@@ -224,10 +224,7 @@ if __name__ == "__main__":
 
     cfg = Settings.from_env_file()
 
-    cache = None
-    if args.cache_dir is not None:
-        cache = diskcache.Cache(args.cache_dir)
-
+    cache = diskcache.Cache(args.cache_dir) if args.cache_dir is not None else None
     oai_client = OAIClient(
         api_key=cfg.openai_api_key,
         organization_id=cfg.openai_org_id,
