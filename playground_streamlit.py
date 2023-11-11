@@ -17,17 +17,18 @@ DEFAULT_PROMPT_ID = "default_prompt"
 
 import openai
 
-def get_models (API_KEY) :
+def get_models(API_KEY):
 	"""
 	for retrieving relevant models
 	and creates a string list or options
 	"""
 	resp = openai.Model.list ( API_KEY )
-	model_ids = [ ]
-	for model in resp [ 'data' ] :
-		if model [ 'id' ].startswith ( ('code' , 'text') ) and len ( model [ 'id' ].split ( '-' ) ) == 3 :
-			model_ids.append ( model [ 'id' ] )
-
+	model_ids = [
+		model['id']
+		for model in resp['data']
+		if model['id'].startswith(('code', 'text'))
+		and len(model['id'].split('-')) == 3
+	]
 	model_ids.sort()
 	return model_ids
 
@@ -54,14 +55,13 @@ DEFAULT_PROMPT = utils.load_prompt(DEFAULT_PROMPT_ID, PROMPT_DIR)
 
 @st.cache_resource(ttl=60 * 60 * 24)
 def init_oai_client():
-    ctx = Settings.from_env_file(".env.secret")
-    cache = diskcache.Cache(directory=ctx.disk_cache_dir)
-    oai_client = OAIClient(
-        api_key=ctx.openai_api_key,
-        organization_id=ctx.openai_org_id,
-        cache=cache,
-    )
-    return oai_client
+	ctx = Settings.from_env_file(".env.secret")
+	cache = diskcache.Cache(directory=ctx.disk_cache_dir)
+	return OAIClient(
+		api_key=ctx.openai_api_key,
+		organization_id=ctx.openai_org_id,
+		cache=cache,
+	)
 
 
 @st.cache_data(ttl=5)
@@ -91,22 +91,21 @@ def run_completion(
     max_tokens: int,
     temperature: float,
 ):
-    print("Running completion!")
-    if stop:
-        if "double-newline" in stop:
-            stop.remove("double-newline")
-            stop.append("\n\n")
-        if "newline" in stop:
-            stop.remove("newline")
-            stop.append("\n")
-    resp = oai_client.complete(
-        prompt_text,
-        model=model,  # type: ignore
-        max_tokens=max_tokens,  # type: ignore
-        temperature=temperature,
-        stop=stop or None,
-    )
-    return resp
+	print("Running completion!")
+	if stop:
+	    if "double-newline" in stop:
+	        stop.remove("double-newline")
+	        stop.append("\n\n")
+	    if "newline" in stop:
+	        stop.remove("newline")
+	        stop.append("\n")
+	return oai_client.complete(
+		prompt_text,
+		model=model,  # type: ignore
+		max_tokens=max_tokens,  # type: ignore
+		temperature=temperature,
+		stop=stop or None,
+	)
 
 
 def run_all(

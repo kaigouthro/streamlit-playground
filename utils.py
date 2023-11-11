@@ -18,7 +18,7 @@ def inject_inputs(
     prompt_template: str, input_keys: List[str], inputs: Dict[str, Any]
 ) -> str:
     text = prompt_template
-    for field_name, field_value in inputs.items():
+    for field_name in inputs:
         pattern = re.compile("{{" + field_name + "}}", re.IGNORECASE)
         text = pattern.sub(str(inputs[field_name]), text)
     return text
@@ -136,7 +136,7 @@ def init_session_state(widget_keys: List[str], query_params: dict):
             query_value = query_params[key][0]
             if key not in st.session_state:
                 if "bool" in key:
-                    query_value = True if query_value.lower() == "true" else False
+                    query_value = query_value.lower() == "true"
                 st.session_state[key] = query_value
 
 
